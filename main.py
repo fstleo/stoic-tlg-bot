@@ -39,19 +39,23 @@ def handle_start(message):
 
 @bot.message_handler(commands=['subscribe'])
 def subscribing(message):
-    bot.reply_to(message, "Subscribed, do you want me to /send_today ?")
-    users_list.append(message.chat.id)
-    save_users_list()
-    print(message.chat.id, " subscribed")
+    if message.chat.id not in users_list:
+        users_list.append(message.chat.id)
+        save_users_list()
+        bot.reply_to(message, "Subscribed, do you want me to /send_today ?")
+        print(message.chat.id, " subscribed")
+    else:
+        bot.reply_to(message, "Already subscribed, do you want me to /send_today ?")
+        print(message.chat.id, " already subscribed")
 
 
 @bot.message_handler(commands=['unsubscribe'])
 def unsubscribing(message):
-    bot.reply_to(message, "Unsubscribed")
-    print(message.chat.id, " unsubscribed")
     if message.chat.id in users_list:
         users_list.remove(message.chat.id)
         save_users_list()
+        bot.reply_to(message, "Unsubscribed")
+        print(message.chat.id, " unsubscribed")
 
 
 @bot.message_handler(commands=['send_today'])
