@@ -70,6 +70,9 @@ def send_to_all():
     for user in users_list:
         send_today(user)
 
+    last_day_sent = datetime.datetime.utcnow()
+    save_last_day(last_day_sent.timestamp())
+
 
 def save_last_day(last_day):
     with open(last_day_file_name, "w") as fp:
@@ -78,7 +81,11 @@ def save_last_day(last_day):
 
 def load_last_day():
     with open(last_day_file_name, "rb") as fp:
-        last_day = datetime.datetime.fromtimestamp(json.load(fp))
+        try:
+            last_day = datetime.datetime.fromtimestamp(json.load(fp))
+        except:
+            last_day = datetime.datetime.today()
+            send_to_all()
         return last_day
 
 
@@ -86,13 +93,12 @@ def check_if_need_to_send():
     last_day_sent = load_last_day()
     print("last time checked %s" % last_day_sent)
     while True:
-        time.sleep(60)
+        time.sleep(600)
         print("Check if today is the day at {}".format(datetime.datetime.utcnow()))
 
         if ((datetime.datetime.utcnow() - last_day_sent).days >= 1) and (datetime.datetime.utcnow().hour > 7):
             send_to_all()
-            last_day_sent = datetime.datetime.utcnow()
-            save_last_day(last_day_sent.timestamp())
+
 
 
 def run_bot():
