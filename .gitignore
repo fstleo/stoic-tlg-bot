@@ -2,4 +2,6 @@
 days
 venv
 .env
+users
+last_day
 

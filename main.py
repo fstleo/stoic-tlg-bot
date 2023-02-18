@@ -8,7 +8,9 @@ import telebot
 from dotenv import load_dotenv
 
 load_dotenv()
-users_file_name = "users.txt"
+users_file_name = "users"
+last_day_file_name = "last_day"
+picture_name_template = "days/stoicism_{}_{}.png"
 token = os.environ["TLG_BOT_TOKEN"]
 bot = telebot.TeleBot(token)
 
@@ -18,7 +20,7 @@ def send_today(chat_id):
     print("send day ", current_day, " to ", chat_id)
     run_dir = os.path.dirname(__file__)
     requests.post("https://api.telegram.org/bot%s/sendPhoto?chat_id=%s" % (token, chat_id),
-                  files={'photo': open(os.path.join(run_dir, "days/stoicism_{}_{}.png".format(current_day.month, current_day.day)), 'rb')})
+                  files={'photo': open(os.path.join(run_dir, picture_name_template.format(current_day.month, current_day.day)), 'rb')})
 
 
 def save_users_list():
@@ -70,12 +72,12 @@ def send_to_all():
 
 
 def save_last_day(last_day):
-    with open("last_day.txt", "w") as fp:
+    with open(last_day_file_name, "w") as fp:
         json.dump(last_day, fp)
 
 
 def load_last_day():
-    with open("last_day.txt", "rb") as fp:
+    with open(last_day_file_name, "rb") as fp:
         last_day = datetime.datetime.fromtimestamp(json.load(fp))
         return last_day
 
