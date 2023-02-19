@@ -6,10 +6,10 @@ import requests
 import json
 import telebot
 from dotenv import load_dotenv
+import schedule
 
 load_dotenv()
 users_file_name = "users"
-last_day_file_name = "last_day"
 picture_name_template = "days/stoicism_{}_{}.png"
 token = os.environ["TLG_BOT_TOKEN"]
 bot = telebot.TeleBot(token)
@@ -70,35 +70,12 @@ def send_to_all():
     for user in users_list:
         send_today(user)
 
-    last_day_sent = datetime.datetime.utcnow()
-    save_last_day(last_day_sent.timestamp())
 
-
-def save_last_day(last_day):
-    with open(last_day_file_name, "w") as fp:
-        json.dump(last_day, fp)
-
-
-def load_last_day():
-    with open(last_day_file_name, "rb") as fp:
-        try:
-            last_day = datetime.datetime.fromtimestamp(json.load(fp))
-        except:
-            last_day = datetime.datetime.today()
-            send_to_all()
-        return last_day
-
-
-def check_if_need_to_send():
-    last_day_sent = load_last_day()
-    print("last time checked %s" % last_day_sent)
+def setup_timer():
+    schedule.every().day.at("8:00").do(send_to_all)
     while True:
-        time.sleep(600)
-        print("Check if today is the day at {}".format(datetime.datetime.utcnow()))
-
-        if ((datetime.datetime.utcnow() - last_day_sent).days >= 1) and (datetime.datetime.utcnow().hour > 7):
-            send_to_all()
-
+        schedule.run_pending()
+        time.sleep(60)
 
 
 def run_bot():
@@ -108,4 +85,4 @@ def run_bot():
 if __name__ == '__main__':
     users_list = load_users_list()
     threading.Thread(target=run_bot).start()
-    threading.Thread(target=check_if_need_to_send()).start()
+    threading.Thread(target=setup_timer()).start()
