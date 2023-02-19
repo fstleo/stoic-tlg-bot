@@ -72,7 +72,7 @@ def send_to_all():
 
 
 def setup_timer():
-    schedule.every().day.at("8:00").do(send_to_all)
+    schedule.every().day.at("08:00").do(send_to_all)
     while True:
         schedule.run_pending()
         time.sleep(60)
