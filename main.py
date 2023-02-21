@@ -7,6 +7,7 @@ import json
 import telebot
 from dotenv import load_dotenv
 import schedule
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 load_dotenv()
 users_file_name = "users"
@@ -36,7 +37,8 @@ def load_users_list():
 
 @bot.message_handler(commands=['start', 'help'])
 def handle_start(message):
-    bot.reply_to(message, "Hi, I'm sending stoic pages every day. You can /subscribe or /unsubscribe")
+    bot.reply_to(message, "Hi, I'm sending pages from stoic book every day. Do you want to /subscribe or just /send_today?")
+    set_unsubscribed_commands_for_user(message.chat.id)
 
 
 @bot.message_handler(commands=['subscribe'])
@@ -46,9 +48,30 @@ def subscribing(message):
         save_users_list()
         bot.reply_to(message, "Subscribed, do you want me to /send_today ?")
         print(message.chat.id, " subscribed")
+        set_subscribed_commands_for_user(message.chat.id)
     else:
         bot.reply_to(message, "Already subscribed, do you want me to /send_today ?")
         print(message.chat.id, " already subscribed")
+
+
+def set_subscribed_commands_for_user(chat_id):
+    bot.set_my_commands(
+        commands=[
+            telebot.types.BotCommand("/send_today", "Send today's picture"),
+            telebot.types.BotCommand("/unsubscribe", "Unsubscribe every day update")
+        ],
+        scope=telebot.types.BotCommandScopeChat(chat_id)
+    )
+
+
+def set_unsubscribed_commands_for_user(chat_id):
+    bot.set_my_commands(
+        commands=[
+            telebot.types.BotCommand("/send_today", "Send today's picture"),
+            telebot.types.BotCommand("/subscribe", "Subscribe for every day update")
+        ],
+        scope=telebot.types.BotCommandScopeChat(chat_id)
+    )
 
 
 @bot.message_handler(commands=['unsubscribe'])
@@ -56,6 +79,7 @@ def unsubscribing(message):
     if message.chat.id in users_list:
         users_list.remove(message.chat.id)
         save_users_list()
+        set_unsubscribed_commands_for_user(message.chat.id)
         bot.reply_to(message, "Unsubscribed")
         print(message.chat.id, " unsubscribed")
 
@@ -79,6 +103,13 @@ def setup_timer():
 
 
 def run_bot():
+    bot.set_my_commands(
+        commands=[
+            telebot.types.BotCommand("/start", "Start")
+        ]
+    )
+    for user in users_list:
+        set_subscribed_commands_for_user(user)
     bot.infinity_polling()
 
 
