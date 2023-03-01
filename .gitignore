@@ -2,6 +2,5 @@
 days
 venv
 .env
-users
-last_day
-
+users.json
+__pycache__/
