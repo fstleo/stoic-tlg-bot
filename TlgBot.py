@@ -28,10 +28,11 @@ class TlgBot:
                               reply_markup=self.get_subscribed_markup())
 
     def get_time_selection_markup_markup(self):
-        markup = ReplyKeyboardMarkup(row_width=6,one_time_keyboard=True)
+        markup = ReplyKeyboardMarkup(row_width=6, one_time_keyboard=True)
         for i in range(4):
             row = [KeyboardButton(time) for time in self.time_slots[i * 6:(i + 1) * 6]]
             markup.add(*row)
+        markup.resize_keyboard = True
         return markup
 
     def try_set_time(self, message):
@@ -56,12 +57,14 @@ class TlgBot:
         markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True)
         row = [KeyboardButton("/send_today"), KeyboardButton("/unsubscribe")]
         markup.add(*row)
+        markup.resize_keyboard = True
         return markup
 
     def get_unsubscribed_markup(self):
         markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True)
         row = [KeyboardButton("/send_today"), KeyboardButton("/subscribe")]
         markup.add(*row)
+        markup.resize_keyboard = True
         return markup
 
     def unsubscribing(self, message):
