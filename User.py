@@ -9,7 +9,7 @@ class User(Base):
 
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True)
-    chat_id = Column(String)
+    chat_id = Column(String(9), unique=True)
     send_time = Column(Time)
 
     def __init__(self, chat_id, send_time):

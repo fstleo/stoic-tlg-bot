@@ -1,8 +1,4 @@
-import sqlite3
-
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from sqlalchemy import select
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Time
 from sqlalchemy.orm import sessionmaker
 
 from RepoExceptions import AlreadyCreatedError, NotFoundError
@@ -11,8 +7,18 @@ from User import User
 
 class SQLRepo:
 
-    def __init__(self, db_path):
+    def __init__(self, db_path, table_name):
         engine = create_engine("sqlite:///{}".format(db_path), echo=True)
+        metadata_obj = MetaData()
+        Table(
+            table_name,
+            metadata_obj,
+            Column("user_id", Integer, primary_key=True),
+            Column("chat_id", String(9), unique=True),
+            Column("send_time", Time),
+        )
+        metadata_obj.create_all(bind=engine, checkfirst=True)
+
         self.session = sessionmaker(bind=engine)()
 
     def get_all(self):
