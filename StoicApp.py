@@ -23,7 +23,9 @@ class StoicApp:
             observer.send_today(user_id, self.picture_provider.get(current_day))
 
     def add_timer(self, user):
-        self.timers_keeper.add(user.chat_id, user.send_time, self.send_today(user.chat_id))
+        def send_today_for_this_user():
+            self.send_today(user.chat_id)
+        self.timers_keeper.add(user.chat_id, user.send_time, send_today_for_this_user)
 
     def subscribe(self, chat_id, time):
         try:

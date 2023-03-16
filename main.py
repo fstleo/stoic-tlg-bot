@@ -9,9 +9,9 @@ from SQLRepo import SQLRepo
 from TimersKeeper import TimersKeeper
 
 load_dotenv()
-users = SQLRepo("users.db")
+users = SQLRepo(os.environ["db_path"], "users")
 
-picture_name_template = "days/stoicism_{}_{}.png"
+picture_name_template = os.environ["pictures_path"] + "/" + os.environ["picture_name_template"]
 run_dir = os.path.dirname(__file__)
 picture_provider = PicturesProvider(picture_name_template, run_dir)
 

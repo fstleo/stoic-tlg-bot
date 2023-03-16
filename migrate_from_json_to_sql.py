@@ -1,5 +1,8 @@
 import json
+import os
 from datetime import datetime
+
+from dotenv import load_dotenv
 
 from SQLRepo import SQLRepo
 from User import User
@@ -19,4 +22,5 @@ def migrate(file_name, repo):
 
 
 if __name__ == '__main__':
-    migrate("users.json", SQLRepo("users.db", "users"))
+    load_dotenv()
+    migrate("users.json", SQLRepo(os.environ["db_path"], "users"))
