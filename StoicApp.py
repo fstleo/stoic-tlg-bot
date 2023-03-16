@@ -23,31 +23,34 @@ class StoicApp:
             observer.send_today(user_id, self.picture_provider.get(current_day))
 
     def add_timer(self, user):
-        def send():
-            self.send_today(user.user_id)
+        self.timers_keeper.add(user.chat_id, user.send_time, self.send_today(user.chat_id))
 
-        self.timers_keeper.add(user.user_id, user.time, send)
-
-    def subscribe(self, user_id, time):
+    def subscribe(self, chat_id, time):
         try:
-            user = User(user_id, time)
-            self.users.add(user)
-            self.add_timer(user)
-        except:
-            user = self.users.get(user_id)
+            user = self.users.get_by_chat_id(chat_id)
             user.set_time(time)
             self.users.update(user)
-        finally:
+            self.timers_keeper.delete(user.chat_id)
+            self.add_timer(user)
             for observer in self.observers:
-                observer.subscribed(user_id, time, True)
-
-    def unsubscribe(self, user_id):
-        try:
-            self.users.delete(user_id)
-            self.timers_keeper.delete(user_id)
-            for observer in self.observers:
-                observer.unsubscribed(user_id, True)
+                observer.subscribed(chat_id, time, True)
         except:
+            user = User(chat_id, time)
+            self.users.add(user)
+            self.add_timer(user)
             for observer in self.observers:
-                observer.unsubscribed(user_id, False)
+                observer.subscribed(chat_id, time, False)
+
+    def unsubscribe(self, chat_id):
+        try:
+            user = self.users.get_by_chat_id(chat_id)
+            self.users.delete(user)
+            print(chat_id, " unsubscribed")
+            self.timers_keeper.delete(chat_id)
+            for observer in self.observers:
+                observer.unsubscribed(chat_id, True)
+        except:
+            print(chat_id, " already unsubscribed")
+            for observer in self.observers:
+                observer.unsubscribed(chat_id, False)
 

@@ -5,12 +5,11 @@ from dotenv import load_dotenv
 from PicturesProvider import PicturesProvider
 from StoicApp import StoicApp
 from TlgBot import TlgBot
-from Repo import Repo
-from JsonListKeeper import JsonListKeeper
+from SQLRepo import SQLRepo
 from TimersKeeper import TimersKeeper
 
 load_dotenv()
-users = Repo(JsonListKeeper("users.json"))
+users = SQLRepo("users.db")
 
 picture_name_template = "days/stoicism_{}_{}.png"
 run_dir = os.path.dirname(__file__)

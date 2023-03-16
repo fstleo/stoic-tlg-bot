@@ -15,6 +15,7 @@ class TlgBot:
         self.bot = telebot.TeleBot(token)
         self.bot.register_message_handler(self.handle_start, commands=['start', 'help'])
         self.bot.register_message_handler(self.subscribing, commands=['subscribe'])
+        self.bot.register_message_handler(self.subscribing, commands=['change_time'])
         self.bot.register_message_handler(self.unsubscribing, commands=['unsubscribe'])
         self.bot.register_message_handler(self.send_by_request, commands=['send_today'])
         self.bot.register_message_handler(self.try_set_time)
@@ -37,25 +38,25 @@ class TlgBot:
 
     def try_set_time(self, message):
         try:
-            datetime.strptime(message.text, '%H:%M')
-            self.app.subscribe(message.chat.id, message.text)
+            send_time = datetime.strptime(message.text, '%H:%M').time()
+            self.app.subscribe(message.chat.id, send_time)
         except ValueError:
             self.bot.reply_to(message, "Not a valid time slot", reply_markup=self.get_time_selection_markup_markup())
 
     def subscribed(self, chat_id, time, success):
         if success:
-            self.bot.send_message(chat_id, "Updates will be sent at {} every day".format(time),
+            self.bot.send_message(chat_id, "Updates will be sent at {} every day".format(time.strftime("%H:%M")),
                                   reply_markup=self.get_subscribed_markup())
         else:
-            self.bot.send_message(chat_id, "Updates will be sent at {} every day".format(time),
+            self.bot.send_message(chat_id, "Updates will be sent at {} every day".format(time.strftime("%H:%M")),
                                   reply_markup=self.get_subscribed_markup())
 
     def subscribing(self, message):
         self.bot.reply_to(message, "What time should it be?", reply_markup=self.get_time_selection_markup_markup())
 
     def get_subscribed_markup(self):
-        markup = ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True)
-        row = [KeyboardButton("/send_today"), KeyboardButton("/unsubscribe")]
+        markup = ReplyKeyboardMarkup(row_width=3, one_time_keyboard=True)
+        row = [KeyboardButton("/send_today"), KeyboardButton("/unsubscribe"), KeyboardButton("/change_time")]
         markup.add(*row)
         markup.resize_keyboard = True
         return markup
@@ -70,13 +71,11 @@ class TlgBot:
     def unsubscribing(self, message):
         self.app.unsubscribe(message.chat.id)
 
-    def unsubscribed(self, id, success):
+    def unsubscribed(self, chat_id, success):
         if success:
-            self.bot.send_message(id, "Unsubscribed", reply_markup=self.get_unsubscribed_markup())
-            print(id, " unsubscribed")
+            self.bot.send_message(chat_id, "Unsubscribed", reply_markup=self.get_unsubscribed_markup())
         else:
-            self.bot.send_message(id, "You're not subscribed", reply_markup=self.get_unsubscribed_markup())
-            print(id, " wasn't subscribed")
+            self.bot.send_message(chat_id, "You're not subscribed", reply_markup=self.get_unsubscribed_markup())
 
     def send_by_request(self, message):
         self.app.send_today(message.chat.id)
